@@ -1,3 +1,4 @@
+**[Utiliser le générateur de planning en ligne](https://lse123812.github.io/generateur-planning/)**
 # Générateur de planning
 
 Ce projet contient un script React (`.jsx`) généré avec Claude permettant de créer et d'organiser facilement un planning.
