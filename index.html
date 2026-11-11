@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Bonne Frite fast food – Planning des équipiers</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--prune:#542D43;--rose:#D98BAA;--mauve:#86536A;--creme:#FFF0D9;--or:#F5B642;--bg:#f3e6ea;--ink:#2c1a24;--ok:#2f7d4f;--ko:#b3261e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a1620}.top h1,.top p{color:#FFF0D9}}
+:root[data-theme="dark"]{--bg:#2a1620}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);font-family:"Nunito","Trebuchet MS",system-ui,sans-serif;color:var(--ink)}
+.top{text-align:center;padding:14px 12px 4px}.top h1{margin:0;font-size:1.3rem;color:var(--prune)}.top p{margin:2px 0 0;font-size:.85rem;color:var(--mauve)}
+.sw{display:none;gap:8px;justify-content:center;padding:8px}
+.sw button{flex:1;max-width:180px}
+.stage{display:flex;gap:28px;justify-content:center;align-items:flex-start;padding:12px}
+.cap{text-align:center;font-weight:800;color:var(--prune);margin:0 0 8px}
+.phone{width:390px;height:780px;background:var(--creme);border-radius:36px;border:6px solid var(--prune);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 14px 34px #542d4344;position:relative}
+.scr{flex:1;overflow-y:auto;padding:16px 16px 10px}
+.nav{display:flex;background:#fff;border-top:2px solid #ead3da;padding:6px 4px}
+.nav button{flex:1;background:none;border:0;color:var(--mauve);font:700 .72rem inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:14px;min-height:54px;cursor:pointer;position:relative}
+.nav button.on{color:var(--prune);background:#f7dde6}
+.nav svg{width:24px;height:24px}
+.bd{position:absolute;top:2px;right:22%;background:var(--ko);color:#fff;border-radius:99px;font-size:.65rem;padding:1px 6px;font-weight:800}
+h2{margin:4px 0 12px;color:var(--prune);font-size:1.35rem;font-weight:900}h3{margin:16px 0 8px;color:var(--mauve);font-size:1rem}
+.card{background:#fff;border-radius:22px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px #542d4318}
+.btn{background:var(--prune);color:#fff;border:0;border-radius:999px;padding:14px 22px;font:800 1rem "Nunito",sans-serif;min-height:52px;cursor:pointer;width:100%}
+.btn.s{background:var(--rose);color:var(--prune)}.btn.g{background:var(--or);color:var(--prune)}.btn.o{background:#fff;color:var(--prune);border:2px solid var(--prune)}
+.sw .btn{width:auto;padding:10px 18px;min-height:44px}
+label{display:block;font-weight:700;font-size:.85rem;color:var(--mauve);margin:10px 0 4px}
+input,select{width:100%;padding:12px 14px;border-radius:16px;border:2px solid #e3c8d2;font:600 1rem "Nunito",sans-serif;background:#fff;color:var(--ink);min-height:48px}
+input:focus,select:focus,button:focus-visible{outline:3px solid var(--or)}
+.logo{display:block;width:190px;height:190px;margin:2px auto 8px;border-radius:50%}
+.c{text-align:center}.big{font-size:2rem;font-weight:900;color:var(--prune)}
+.slide{position:relative;height:64px;border-radius:999px;background:var(--rose);margin:10px 0;touch-action:none;user-select:none;overflow:hidden}
+.slide.g{background:var(--or)}.slide.m{background:var(--mauve)}
+.slide span.l{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--prune);padding-left:50px;pointer-events:none}.slide.m span.l{color:#fff}
+.th{position:absolute;left:5px;top:5px;width:54px;height:54px;border-radius:50%;background:var(--prune);display:flex;align-items:center;justify-content:center;color:#fff;cursor:grab;touch-action:none}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed #e3c8d2}.row:last-child{border:0}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;background:var(--creme);font-weight:800;font-size:.8rem;color:var(--prune)}
+.al{border-left:6px solid var(--ko);background:#fdecea;border-radius:14px;padding:10px 12px;margin:8px 0;font-size:.9rem;font-weight:600}
+.al.w{border-color:var(--or);background:#fff6df}.okc{border-left-color:var(--ok);background:#e8f5ec}
+.ph{width:104px;height:104px;border-radius:50%;background:var(--rose);border:4px solid var(--prune);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--prune);font-size:2rem;font-weight:900}
+.ph img{width:100%;height:100%;object-fit:cover}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+small{color:var(--mauve)}
+@media (max-width:860px){.stage{padding:6px}.sw{display:flex}.phone{width:100%;max-width:430px;height:calc(100vh - 150px);min-height:540px}.col{display:none;width:100%;max-width:430px}.col.show{display:block}}
+</style>
+</head>
+<body>
+<div class="top"><h1>La Bonne Frite fast food</h1><p>Démonstration : vue du patron et vue d’un équipier</p></div>
+<div class="sw"><button class="btn" id="sb" onclick="vw('b')">Patron</button><button class="btn o" id="se" onclick="vw('e')">Équipier</button></div>
+<div class="stage">
+<div class="col show" id="cb"><p class="cap">Vue du patron</p><div class="phone"><div class="scr" id="sb_"></div><div class="nav" id="nb"></div></div></div>
+<div class="col show" id="ce"><p class="cap">Vue de l’équipier</p><div class="phone"><div class="scr" id="se_"></div><div class="nav" id="ne"></div></div></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
