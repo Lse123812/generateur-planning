@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Bonne Frite – Planning des équipiers</title>
+<style>
+:root{--prune:#542d43;--rose:#d98baa;--mauve:#86536a;--creme:#fff0d9;--or:#f5b642;--blanc:#fff;--rouge:#b3261e;--vert:#2f7d4f;--rosepale:#f7dde6;--ink:#392332}
+*{box-sizing:border-box}body{margin:0;background:var(--creme);color:var(--prune);font-family:Nunito,"Segoe UI",Arial,sans-serif}
+header{background:var(--prune);color:white;padding:18px max(16px,calc((100% - 1050px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.25rem;margin:0}header small{opacity:.8}
+main{max-width:1050px;margin:22px auto;padding:0 14px}.switch{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+button,.tab{border:0;border-radius:12px;padding:11px 16px;font-weight:750;cursor:pointer;background:var(--prune);color:#fff}
+button.secondary,.tab{background:white;color:var(--prune);border:1px solid #ead8df}
+button.gold{background:var(--or);color:var(--prune)}button.pink{background:var(--rose);color:var(--prune)}
+button:disabled{opacity:.45;cursor:not-allowed}
+nav{display:flex;gap:6px;background:white;border-radius:15px;padding:6px;margin:0 0 16px;box-shadow:0 2px 12px #542d4310}
+nav button{flex:1;background:transparent;color:var(--mauve);padding:10px 6px}nav button.active{background:var(--rosepale);color:var(--prune)}
+.panel{background:#fff;border-radius:18px;padding:18px;margin:12px 0;box-shadow:0 3px 16px #542d4310}
+h2{font-size:1.35rem;margin:8px 0 14px}h3{font-size:1rem;margin:0 0 12px}
+label{display:block;font-size:.85rem;font-weight:750;color:var(--mauve);margin:10px 0 5px}
+input,select{width:100%;padding:10px;border:1px solid #d9c6cf;border-radius:9px;background:#fff;color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto;accent-color:var(--prune)}.days{display:flex;gap:10px;flex-wrap:wrap;margin:9px 0}.days label{margin:0;color:var(--ink);font-weight:600}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid7{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.muted{color:var(--mauve);font-size:.88rem}.small{font-size:.82rem}
+.staff-card,.day-card,.alert{background:#fff;border:1px solid #f0e5e9;border-radius:13px;padding:13px;margin:9px 0}
+.day-card.today{border:2px solid var(--or)}.alert{background:#fdecea;border:0;color:#6b231e}.alert.warn{background:#fff6df;color:#674c16}.success{background:#e8f5ec;color:var(--vert);padding:12px;border-radius:12px}
+.pill{display:inline-block;background:var(--rosepale);border-radius:20px;padding:4px 9px;font-size:.78rem;font-weight:700}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions button{flex:1}
+.bigtime{font-size:1.8rem;font-weight:850;margin:8px 0}.hidden{display:none!important}
+footer{text-align:center;color:var(--mauve);font-size:.8rem;padding:24px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--prune);color:white;padding:12px 18px;border-radius:12px;display:none;max-width:90%;z-index:9}
+@media(max-width:650px){main{margin:12px auto}.grid7{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}header{padding:15px}.panel{padding:14px}nav button{font-size:.8rem}}
+</style>
+</head>
+<body>
+<header><div><h1>🍟 La Bonne Frite</h1><small>Planning des équipiers</small></div><span class="pill">Version web</span></header>
+<main>
+<div class="switch"><button id="bossMode" class="gold" onclick="setMode('boss')">👔 Vue du patron</button><button id="workerMode" class="secondary" onclick="setMode('worker')">👥 Vue équipier</button></div>
+<div id="bossArea">
+<nav id="bossNav"><button data-page="team" class="active" onclick="page('boss','team')">👥 Équipe</button><button data-page="plan" onclick="page('boss','plan')">▦ Planning</button><button data-page="alerts" onclick="page('boss','alerts')">🔔 Alertes</button></nav>
+<section id="bossContent"></section>
+</div>
+<div id="workerArea" class="hidden">
+<nav id="workerNav"><button data-page="home" class="active" onclick="page('worker','home')">⌂ Accueil</button><button data-page="plan" onclick="page('worker','plan')">▦ Planning</button><button data-page="alerts" onclick="page('worker','alerts')">🔔 Alertes</button><button data-page="profile" onclick="page('worker','profile')">☺ Profil</button></nav>
+<section id="workerContent"></section>
+</div>
+</main><footer>La Bonne Frite · Simulation pédagogique · Les données ne sont pas enregistrées.</footer><div id="toast"></div>
+<script>
+const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const POSTS={
+'Caisse':[[1,2,3,4,5],'11:00','18:30'],
+'Friteuse et cuisine':[[0,1,2,3,4],'10:30','18:00'],
+'Grill et burgers':[[2,3,4,5,6],'11:30','19:00'],
+'Préparation et stock':[[0,1,2,3,4],'07:30','15:00'],
+'Salle et accueil':[[0,3,4,5,6],'12:00','19:30'],
+'Livraison et plonge':[[3,4,5,6,0],'17:00','22:00']};
+const PAUSE=30;let staff=[],nextId=0,currentId=null,planningId=null,mode='boss',bossPage='team',workerPage='home';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function today(){let d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function week(){let d=today(),n=(d.getDay()+6)%7;d.setDate(d.getDate()-n);return Array.from({length:7},(_,i)=>{let x=new Date(d);x.setDate(x.getDate()+i);return x})}
+function hm(s){if(!/^\d{2}:\d{2}$/.test(s||''))return null;let [h,m]=s.split(':').map(Number);return h<24&&m<60?h*60+m:null}
+function fmt(m){return `${String(Math.floor((m/60)%24)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`}
+function hours(m){m=Math.round(m);return `${Math.floor(m/60)} h ${String(m%60).padStart(2,'0')}`}
+function nowMin(){let d=new Date();return d.getHours()*60+d.getMinutes()}
+function parseDate(s){let m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s||'');if(!m)return null;let d=new Date(+m[3],+m[2]-1,+m[1]);return d.getFullYear()==+m[3]&&d.getMonth()==+m[2]-1&&d.getDate()==+m[1]?d:null}
+function selected(){return staff.find(e=>e.id===currentId)||null}
+function eff(e,d){let r=e.days[dateKey(d)]||{};if(r.as){let live=!r.ae&&dateKey(d)===dateKey(today()),p=(r.pb||0)+(r.pst!=null&&live?nowMin()-r.pst:0);return{s:r.as,e:r.ae||(live?fmt(nowMin()):null),p,live}}return{s:r.ps||null,e:r.pe||null,p:(r.ps||r.pe)?(r.pp||0):0,live:false}}
+function span(x){let a=hm(x.s),b=hm(x.e);if(a==null||b==null)return null;return[a,b<a?b+1440:b]}
+function worked(x){let q=span(x);return q?q[1]-q[0]-x.p:0}
+function limits(e){let age=ageOf(e);if(age<16)return{d:420,pb:270,pm:30,r:840,n:20};if(age<18)return{d:480,pb:270,pm:30,r:720,n:22};return{d:600,pb:360,pm:20,r:660,n:null}}
+function ageOf(e){let t=today(),b=e.birth;return t.getFullYear()-b.getFullYear()-((t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))?1:0)}
+function alerts(e){let L=limits(e),out=[],total=0,prev=null,any=false;if(!e.name||!e.first)out.push([true,'Profil incomplet : nom ou prénom manquant.']);week().forEach((d,i)=>{let x=eff(e,d),q=span(x),j=DAYS[i];if(x.s&&!x.e&&!x.live){out.push([false,`${j} : case vide, heure de fin manquante. Comptabilisation impossible.`]);prev=null;return}if(!x.s&&x.e){out.push([false,`${j} : case vide, heure de début manquante.`]);prev=null;return}if(!q){prev=null;return}any=true;let w=worked(x),g=q[1]-q[0];total+=w;if(w>L.d)out.push([false,`${j} : ${hours(w)} de travail, maximum ${hours(L.d)} par jour.`]);if(g>L.pb&&x.p<L.pm)out.push([false,`${j} : pause de ${L.pm} min obligatoire (actuelle : ${x.p} min).`]);if(L.n&&(q[1]>L.n*60||q[0]<360))out.push([false,`${j} : travail de nuit interdit (entre ${L.n} h et 6 h) pour ce salarié.`]);if(prev!=null&&q[0]+1440-prev<L.r)out.push([false,`${j} : repos de ${hours(q[0]+1440-prev)} seulement avant ce service, minimum ${L.r/60} h consécutives.`]);prev=q[1]});if(total>2100)out.push([false,`Semaine : ${hours(total)} de travail, maximum 35 h.`]);if(any){let off=week().map(d=>!span(eff(e,d)));if(ageOf(e)<18){if(!(off[6]&&(off[5]||off[0])))out.push([false,'Repos hebdomadaire : 2 jours consécutifs minimum, dimanche inclus, pour un mineur.'])}else if(!off.some(Boolean))out.push([false,'Repos hebdomadaire : 24 h consécutives minimum par semaine.'])}return out}
+function totals(e){let s=0,p=0;week().forEach(d=>{let x=eff(e,d);if(span(x)){s+=worked(x);p+=x.p}});return[s,p]}
+function toast(t){$('toast').textContent=t;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2800)}
+function setMode(m){mode=m;$('bossArea').classList.toggle('hidden',m!=='boss');$('workerArea').classList.toggle('hidden',m!=='worker');$('bossMode').className=m==='boss'?'gold':'secondary';$('workerMode').className=m==='worker'?'gold':'secondary';render()}
+function page(m,p){if(m==='boss')bossPage=p;else workerPage=p;render()}
+function navActive(){document.querySelectorAll('nav').forEach(n=>n.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.page===(n.id==='bossNav'?bossPage:workerPage))))}
+function render(){navActive();renderBoss();renderWorker()}
+function card(t,body){return `<div class="panel"><h3>${t}</h3>${body}</div>`}
+function renderBoss(){let c=$('bossContent');if(bossPage==='team'){let body=`<h2>Mon équipe (${staff.length}/6)</h2>${card('Inscrire un équipier',`<div class="grid2"><div><label>Date d’entrée (JJ/MM/AAAA)</label><input id="hire" placeholder="JJ/MM/AAAA"></div><div><label>Date de naissance (JJ/MM/AAAA)</label><input id="birth" placeholder="JJ/MM/AAAA"></div></div><label>Poste occupé</label><select id="post" onchange="choosePost()"><option value="">Choisir un poste</option>${Object.keys(POSTS).map(p=>`<option>${p}</option>`).join('')}</select><label>Jours de service</label><div class="days">${DAYS.map((d,i)=>`<label><input type="checkbox" id="d${i}"> ${d.slice(0,3)}</label>`).join('')}</div><div class="grid2"><div><label>Début (HH:MM)</label><input id="start" placeholder="HH:MM"></div><div><label>Fin (HH:MM)</label><input id="end" placeholder="HH:MM"></div></div><p class="muted">Pause : 30 minutes (fixe). Horaires proposés selon le poste, modifiables. L’équipier complète ensuite nom, prénom et photo.</p><button class="gold" onclick="addStaff()">Inscrire l’équipier</button>`)}`;staff.forEach(e=>{let [s,p]=totals(e);body+=`<div class="staff-card"><div class="row"><strong>${esc((e.first+' '+e.name).trim()||'Équipier n°'+e.id)}</strong><span class="pill">${ageOf(e)} ans</span></div><p class="muted">${esc(e.post)} · entré le ${e.hire.toLocaleDateString('fr-FR')}</p><p>Semaine : ${hours(s)} · Pauses : ${hours(p)}</p><button class="pink" onclick="removeStaff(${e.id})">Retirer</button></div>`});body+=`<button class="secondary" onclick="legal()">Mentions légales</button>`;c.innerHTML=body}
+else if(bossPage==='plan'){if(!staff.length){c.innerHTML='<h2>Planning de la semaine</h2><p>Inscrivez d’abord un équipier.</p>';return}if(!staff.some(e=>e.id===planningId))planningId=staff[0].id;let e=staff.find(x=>x.id===planningId);c.innerHTML=`<h2>Planning de la semaine</h2><label>Équipier</label><select id="planWho" onchange="planningId=+this.value;render()">${staff.map(x=>`<option value="${x.id}" ${x.id===e.id?'selected':''}>${x.id} – ${esc((x.first+' '+x.name).trim()||'Équipier n°'+x.id)}</option>`).join('')}</select>${week().map((d,i)=>{let r=e.days[dateKey(d)]||{};return `<div class="day-card"><strong>${DAYS[i]} ${d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}</strong><div class="grid2"><div><label>Début</label><input id="ps${i}" value="${esc(r.ps||'')}" placeholder="HH:MM"></div><div><label>Fin</label><input id="pe${i}" value="${esc(r.pe||'')}" placeholder="HH:MM"></div></div><small class="muted">Pause 30 min · vide = repos</small></div>`}).join('')}<button class="gold" onclick="savePlan()">Enregistrer le planning</button>`}
+else{c.innerHTML=`<h2>Alertes</h2>${!staff.length?'<p>Aucun équipier inscrit.</p>':''}${staff.map(e=>alerts(e).map(a=>`<div class="alert ${a[0]?'warn':''}"><strong>${esc((e.first+' '+e.name).trim()||'Équipier n°'+e.id)} – </strong>${esc(a[1])}</div>`).join('')).join('')}${staff.length&&!staff.some(e=>alerts(e).length)?'<div class="success">Aucune alerte : tous les horaires respectent les règles.</div>':''}`}}
+function choosePost(){let p=$('post').value;if(!p)return;let [days,s,e]=POSTS[p];DAYS.forEach((_,i)=>$('d'+i).checked=days.includes(i));$('start').value=s;$('end').value=e}
+function addStaff(){if(staff.length>=6)return toast('L’équipe est limitée à 6 équipiers.');let hire=parseDate($('hire').value),birth=parseDate($('birth').value),post=$('post').value,s=$('start').value,e=$('end').value,days=DAYS.map((_,i)=>$('d'+i).checked?i:null).filter(x=>x!==null);if(!hire||!birth)return toast('Saisissez les dates au format JJ/MM/AAAA.');if(!post||!days.length)return toast('Choisissez un poste et au moins un jour.');if(hm(s)==null||hm(e)==null)return toast('Saisissez les horaires au format HH:MM.');let emp={id:++nextId,post,hire,birth,name:'',first:'',photo:'',days:{}};week().forEach((d,i)=>{if(days.includes(i))emp.days[dateKey(d)]={ps:s,pe:e,pp:PAUSE}});staff.push(emp);currentId=currentId||emp.id;planningId=planningId||emp.id;render();toast('Équipier inscrit.')}
+function removeStaff(id){staff=staff.filter(e=>e.id!==id);if(currentId===id)currentId=staff[0]?.id||null;if(planningId===id)planningId=staff[0]?.id||null;render()}
+function savePlan(){let e=staff.find(x=>x.id===planningId);for(let i=0;i<7;i++){let s=$('ps'+i).value.trim(),f=$('pe'+i).value.trim();if((s&&hm(s)==null)||(f&&hm(f)==null))return toast(`${DAYS[i]} : format attendu HH:MM.`)}week().forEach((d,i)=>{let s=$('ps'+i).value.trim(),f=$('pe'+i).value.trim(),r=e.days[dateKey(d)]||(e.days[dateKey(d)]={});r.ps=s;r.pe=f;r.pp=(s||f)?PAUSE:0});render();toast('Planning enregistré.')}
+function renderWorker(){let c=$('workerContent'),e=selected();if(!e){c.innerHTML='<div class="panel"><h2>Aucun équipier pour le moment.</h2>Le patron doit d’abord vous inscrire.</div>';return}let chooser=`<label>Profil équipier</label><select onchange="currentId=+this.value;render()">${staff.map(x=>`<option value="${x.id}" ${x.id===e.id?'selected':''}>${x.id} – ${esc((x.first+' '+x.name).trim()||'Équipier n°'+x.id)}</option>`).join('')}</select>`;
+if(workerPage==='home'){let d=today(),r=e.days[dateKey(d)]||(e.days[dateKey(d)]={}),a=alerts(e);let body=`<h2>Bonjour ${esc(e.first||'')} !</h2>${card('Horaire de la journée',`<div class="bigtime">${r.ps&&r.pe?`${r.ps} – ${r.pe}`:'Repos'}</div>${r.ps?`<p class="muted">Pause prévue : ${PAUSE} min</p>`:''}`)}${a.length?`<div class="alert warn">⚠ ${a.length} alerte(s) : voir l’onglet Alertes.</div>`:''}`;if(!r.as)body+=`<button class="gold" onclick="clock('start')">➜ Début de service</button>`;else if(!r.ae){let x=eff(e,d);body+=card('Pointage en cours',`En service depuis ${r.as}<br>Travaillé : ${hours(worked(x))}<div class="actions">${r.pst!=null?'<button onclick="clock(\\'resume\\')">Fin de pause</button>':'<button class="pink" onclick="clock(\\'pause\\')">Début de pause</button>'}<button class="gold" onclick="clock('end')">Fin de service</button></div>`)}else body+=card('Service terminé','<div class="bigtime">À demain !</div>');c.innerHTML=chooser+body}
+else if(workerPage==='plan'){c.innerHTML=chooser+'<h2>Planning de la semaine</h2>'+week().map((d,i)=>{let x=eff(e,d),q=span(x);return `<div class="day-card ${dateKey(d)===dateKey(today())?'today':''}"><div class="row"><strong>${DAYS[i]} ${d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}</strong><span>${q?`${esc(x.s)} – ${esc(x.e||'…')} · pause ${x.p} min`:'Repos'}</span></div></div>`}).join('')}
+else if(workerPage==='alerts'){let a=alerts(e),r=e.days[dateKey(today())]||{},notes=[];if(r.pst!=null)notes.push(`Reprise de service à ${fmt(r.pst+PAUSE)} h`);else if(r.ps&&!r.as)notes.push(`Début de service à ${r.ps}`);if(r.pe&&!r.ae)notes.push(`Fin de service à ${r.pe}`);c.innerHTML=chooser+'<h2>Alertes</h2><h3>Horaire impossible</h3>'+(a.length?a.map(x=>`<div class="alert ${x[0]?'warn':''}">${esc(x[1])}</div>`).join(''):'<div class="success">Aucune alerte : tous les horaires respectent les règles.</div>')+'<h3>Notifications</h3>'+(notes.length?notes.map(n=>`<div class="alert warn">${esc(n)}</div>`).join(''):'<p class="muted">Aucune notification pour le moment.</p>')+'<h3>Les deux prochains jours</h3>'+[1,2].map(k=>{let d=today();d.setDate(d.getDate()+k);let x=eff(e,d);return `<div class="day-card">${DAYS[d.getDay()?((d.getDay()+6)%7):6]} ${d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})} : ${span(x)?`${esc(x.s)} – ${esc(x.e)}`:'Repos'}</div>`}).join('')}
+else{let [s,p]=totals(e);c.innerHTML=chooser+`<h2>Mon profil</h2><div class="panel"><div class="row"><div class="bigtime">${e.photo?`<img src="${e.photo}" style="width:74px;height:74px;object-fit:cover;border-radius:50%">`:(e.first[0]||'?').toUpperCase()}</div><div><strong>${esc((e.first+' '+e.name).trim()||'Équipier')}</strong><p class="muted">${esc(e.post)} · entré le ${e.hire.toLocaleDateString('fr-FR')}</p></div></div><div class="grid2"><div class="staff-card"><small>Heures de service</small><div class="bigtime">${hours(s)}</div></div><div class="staff-card"><small>Heures de pause</small><div class="bigtime">${hours(p)}</div></div></div><label>Nom</label><input id="profileName" value="${esc(e.name)}"><label>Prénom</label><input id="profileFirst" value="${esc(e.first)}"><p class="muted">Poste occupé (défini par le patron) : ${esc(e.post)}</p><label>Photo de profil (facultatif)</label><input type="file" id="photo" accept="image/png,image/gif,image/jpeg"><div class="actions"><button class="pink" onclick="savePhoto()">Choisir une photo</button><button class="gold" onclick="saveProfile()">Enregistrer</button></div></div><button class="secondary" onclick="legal()">Mentions légales</button>`}}
+function clock(action){let e=selected(),r=e.days[dateKey(today())]||(e.days[dateKey(today())]={}),t=nowMin();if(action==='start'){r.as=fmt(t);r.pb=0;r.pst=null}else if(action==='pause')r.pst=t;else if(action==='resume'){r.pb=(r.pb||0)+t-r.pst;r.pst=null}else if(action==='end'){if(r.pst!=null){r.pb=(r.pb||0)+t-r.pst;r.pst=null}r.ae=fmt(t)}render();if(alerts(e).length)toast('Alerte horaire : consultez l’onglet Alertes.')}
+function saveProfile(){let e=selected();e.name=$('profileName').value.trim();e.first=$('profileFirst').value.trim();render();toast('Profil enregistré.')}
+function savePhoto(){let f=$('photo').files[0];if(!f)return toast('Sélectionnez une image.');let reader=new FileReader();reader.onload=()=>{selected().photo=reader.result;render()};reader.readAsDataURL(f)}
+function legal(){let content=`<h2>Mentions légales</h2>${[['Nom de l’application','La Bonne Frite fast food – Planning des équipiers'],['Éditeurs','Juliette V et Louise S, classe de 1re STMG, lycée.'],['Hébergeur','GitHub Pages (version web).'],['Sources des données','Code du travail (Légifrance) et Service-Public.fr, consultés en novembre 2026.'],['Avertissement','Simulation pédagogique : les résultats sont indicatifs et ne remplacent pas l’avis d’un professionnel.'],['Données personnelles','Aucune donnée personnelle n’est collectée ni enregistrée, aucun cookie n’est utilisé.'],['Crédits','Logo « La Bonne Frite » : créé pour le projet des éditeurs. Police : Nunito / police système. Icônes : symboles du système.']].map(x=>`<div class="staff-card"><strong>${esc(x[0])}</strong><p>${esc(x[1])}</p></div>`).join('')}`;let w=window.open('','_blank');if(w){w.document.write(`<meta charset="utf-8"><title>Mentions légales</title><body style="font-family:Arial;background:#fff0d9;color:#542d43;padding:20px;max-width:700px;margin:auto">${content}</body>`);w.document.close()}else toast('Autorisez les fenêtres contextuelles pour afficher les mentions légales.')}
+render();setInterval(()=>{if(mode==='worker'&&workerPage==='home')renderWorker()},30000);
+</script>
+</body></html>
